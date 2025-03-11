@@ -14,6 +14,11 @@ public class Main {
             }
         }
 
+        if (numOfQuestions == 0) {
+            System.out.println("Error: Missing required parameter -n.");
+            return;
+        }
+
         if (range == 0) {
             System.out.println("Error: Missing required parameter -r.");
             return;
