@@ -39,35 +39,7 @@ public class ExpressionGenerator {
         return num1 + " " + operator + " " + num2;
     }
 
-    // 计算表达式的答案
-//    private static String calculateAnswer(String expression) {
-//        // 这里简单解析并计算基础的四则运算
-//        String[] tokens = expression.split(" ");
-//        int num1 = Integer.parseInt(tokens[0]);
-//        String operator = tokens[1];
-//        int num2 = Integer.parseInt(tokens[2]);
-//
-//        int result = 0;
-//        switch (operator) {
-//            case "+":
-//                result = num1 + num2;
-//                break;
-//            case "-":
-//                result = num1 - num2;
-//                break;
-//            case "*":
-//                result = num1 * num2;
-//                break;
-//            case "/":
-//                // 除法时处理除数为0的情况
-//                if (num2 != 0) {
-//                    result = num1 / num2;
-//                }
-//                break;
-//        }
 
-
-//    public class FractionCalculator {
 
     private static String calculateAnswer(String expression) {
         // 简单解析并计算基础的四则运算
