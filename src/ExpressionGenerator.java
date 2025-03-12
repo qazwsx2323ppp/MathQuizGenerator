@@ -1,5 +1,4 @@
 import java.util.*;
-
 // 用于表示数学表达式及其答案的类
 
 
@@ -41,31 +40,73 @@ public class ExpressionGenerator {
     }
 
     // 计算表达式的答案
+//    private static String calculateAnswer(String expression) {
+//        // 这里简单解析并计算基础的四则运算
+//        String[] tokens = expression.split(" ");
+//        int num1 = Integer.parseInt(tokens[0]);
+//        String operator = tokens[1];
+//        int num2 = Integer.parseInt(tokens[2]);
+//
+//        int result = 0;
+//        switch (operator) {
+//            case "+":
+//                result = num1 + num2;
+//                break;
+//            case "-":
+//                result = num1 - num2;
+//                break;
+//            case "*":
+//                result = num1 * num2;
+//                break;
+//            case "/":
+//                // 除法时处理除数为0的情况
+//                if (num2 != 0) {
+//                    result = num1 / num2;
+//                }
+//                break;
+//        }
+
+
+//    public class FractionCalculator {
+
     private static String calculateAnswer(String expression) {
-        // 这里简单解析并计算基础的四则运算
+        // 简单解析并计算基础的四则运算
         String[] tokens = expression.split(" ");
         int num1 = Integer.parseInt(tokens[0]);
         String operator = tokens[1];
         int num2 = Integer.parseInt(tokens[2]);
 
-        int result = 0;
+        // 用于存储最终结果的字符串
+        String result;
+
         switch (operator) {
             case "+":
-                result = num1 + num2;
+                result = String.valueOf(num1 + num2);
                 break;
             case "-":
-                result = num1 - num2;
+                result = String.valueOf(num1 - num2);
                 break;
             case "*":
-                result = num1 * num2;
+                result = String.valueOf(num1 * num2);
                 break;
             case "/":
-                // 除法时处理除数为0的情况
-                if (num2 != 0) {
-                    result = num1 / num2;
-                }
+                // 使用 Fraction 类处理除法运算
+                Fraction fraction = new Fraction(num1, num2);
+                result = fraction.toString();
                 break;
+            default:
+                result = "Invalid operator";
         }
+
+//        public static void main(String[] args) {
+//            // 测试代码
+//            System.out.println(calculateAnswer("10 + 5")); // 输出：15
+//            System.out.println(calculateAnswer("10 - 5")); // 输出：5
+//            System.out.println(calculateAnswer("10 * 5")); // 输出：50
+//            System.out.println(calculateAnswer("10 / 5")); // 输出：2
+//            System.out.println(calculateAnswer("11 / 4")); // 输出：2'3/4
+//            System.out.println(calculateAnswer("10 / 3")); // 输出：3'1/3
+//        }
         return String.valueOf(result);
     }
 }
