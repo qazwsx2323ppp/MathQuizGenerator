@@ -1,85 +1,103 @@
-import java.util.*;
-// 用于表示数学表达式及其答案的类
-
+import java.util.List;
+import java.util.Random;
 
 public class ExpressionGenerator {
+    private final Random random = new Random();
+    private static final double BRACKET_PROBABILITY = 0.4;
+    private final int range;  // 通过构造函数动态传入范围
+    private static final int MAX_OPERATORS = 3; // 新增最大运算符限制
 
-    // 生成指定数量的数学表达式
-    public static List<MathExpression> generateExpressions(int numOfQuestions, int range) {
-        List<MathExpression> expressions = new ArrayList<>();
+    // 构造函数接收范围参数
+    public ExpressionGenerator(int range) {
+        if (range < 1) {
+            throw new IllegalArgumentException("数值范围必须大于0");
+        }
+        this.range = range;
+    }
 
-        for (int i = 0; i < numOfQuestions; i++) {
-            MathExpression expression = generateRandomExpression(range);
-            expressions.add(expression);
+    public ExpressionNode generateExpression(int maxOperators) {
+        if (maxOperators < 1 || maxOperators > 3) {
+            throw new IllegalArgumentException("运算符数量必须在1-3之间");
         }
 
-        return expressions;
-    }
+        ExpressionNode root = null;
+        do {
+            try {
+                root = buildExpressionTree(MAX_OPERATORS,false, true,false,0);
+                validateExpression(root); // 验证表达式有效性
+            } catch (ValidationException e) {
+                root = null; // 如果验证失败则重新生成
+            }
+        } while (root == null);
 
-    // 生成一个随机的数学表达式并计算答案
-    private static MathExpression generateRandomExpression(int range) {
-        String expression = generateRandomMathExpression(range);  // 生成随机的数学表达式
-        String answer = calculateAnswer(expression);  // 计算该表达式的答案
-        return new MathExpression(expression, answer);  // 使用生成的表达式和答案创建 MathExpression 对象
-    }
-
-    // 生成随机的数学表达式
-    private static String generateRandomMathExpression(int range) {
-        Random random = new Random();
-
-        // 生成随机数
-        int num1 = random.nextInt(range);  // 生成一个在 [0, range) 范围内的随机整数
-        int num2 = random.nextInt(range);
-
-        // 选择一个随机的运算符
-        String[] operators = {"+", "-", "*", "/"};
-        String operator = operators[random.nextInt(operators.length)];
-
-        // 构建一个简单的数学表达式
-        return num1 + " " + operator + " " + num2;
+        return root;
     }
 
 
-
-    private static String calculateAnswer(String expression) {
-        // 简单解析并计算基础的四则运算
-        String[] tokens = expression.split(" ");
-        int num1 = Integer.parseInt(tokens[0]);
-        String operator = tokens[1];
-        int num2 = Integer.parseInt(tokens[2]);
-
-        // 用于存储最终结果的字符串
-        String result;
-
-        switch (operator) {
-            case "+":
-                result = String.valueOf(num1 + num2);
-                break;
-            case "-":
-                result = String.valueOf(num1 - num2);
-                break;
-            case "*":
-                result = String.valueOf(num1 * num2);
-                break;
-            case "/":
-                // 使用 Fraction 类处理除法运算
-                Fraction fraction = new Fraction(num1, num2);
-                result = fraction.toString();
-                break;
-            default:
-                result = "Invalid operator";
+    private ExpressionNode buildExpressionTree(int remainingOps, boolean bracketsUsed,
+                                               boolean isRoot, boolean inBracketContext,
+                                               int parentPriority) {
+        if (remainingOps <= 0) {
+            return new NumberNode(Fraction.generate(range));
         }
 
-//        public static void main(String[] args) {
-//            // 测试代码
-//            System.out.println(calculateAnswer("10 + 5")); // 输出：15
-//            System.out.println(calculateAnswer("10 - 5")); // 输出：5
-//            System.out.println(calculateAnswer("10 * 5")); // 输出：50
-//            System.out.println(calculateAnswer("10 / 5")); // 输出：2
-//            System.out.println(calculateAnswer("11 / 4")); // 输出：2'3/4
-//            System.out.println(calculateAnswer("10 / 3")); // 输出：3'1/3
-//        }
-        return String.valueOf(result);
+        Operator op = randomOperator();
+        // 动态分配剩余运算符（关键修改点）
+        int leftOps = random.nextInt(remainingOps);
+        int rightOps = remainingOps - leftOps - 1;
+
+        // 强化括号上下文传递（新增多层检测）
+        boolean canAddBracket = !isRoot && !inBracketContext && remainingOps >= 2;
+        boolean addBrackets = canAddBracket && random.nextDouble() < BRACKET_PROBABILITY;
+
+        // 生成子树时严格传递上下文状态
+        ExpressionNode left = buildSubTree(leftOps, bracketsUsed || addBrackets,
+                addBrackets, op.getPriority());
+        ExpressionNode right = buildSubTree(rightOps, bracketsUsed || addBrackets,
+                addBrackets, op.getPriority());
+
+        return new OperatorNode(op, left, right, addBrackets, isRoot, parentPriority);
+    }
+
+    private ExpressionNode buildSubTree(int remainingOps, boolean bracketsUsed,
+                                        boolean inBracketContext, int parentPriority) {
+        if (remainingOps > 0 && random.nextDouble() < 0.4) {
+            return buildExpressionTree(remainingOps, bracketsUsed, false,
+                    inBracketContext, parentPriority);
+        }
+        return new NumberNode(Fraction.generate(range));
+    }
+
+
+     private boolean shouldAddBrackets(int remainingOps) {
+           return random.nextDouble() < BRACKET_PROBABILITY * (4 - remainingOps)/3.0;
+        }
+
+    private Operator randomOperator() {
+        Operator[] operators = Operator.values();
+        return operators[random.nextInt(operators.length)];
+    }
+
+
+
+    private void validateExpression(ExpressionNode node) {
+        try {
+            List<String> infix = node.toExpressionList();
+            List<String> postfix = PostfixConverter.convert(infix);
+            Fraction result = PostfixCalculator.calculate(postfix);
+
+            // 检查结果是否为负数或分母为零
+            if (result.getNumerator() < 0) {
+                throw new ValidationException("结果为负数");
+            }
+        } catch (ArithmeticException e) {
+            throw new ValidationException("计算过程中出现除零错误");
+        }
+    }
+
+    private static class ValidationException extends RuntimeException {
+        public ValidationException(String message) {
+            super(message);
+        }
     }
 }
-
