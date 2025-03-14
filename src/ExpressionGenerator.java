@@ -23,7 +23,7 @@ public class ExpressionGenerator {
         ExpressionNode root = null;
         do {
             try {
-                root = buildExpressionTree(MAX_OPERATORS,false, true,false,0);
+                root = buildExpressionTree(MAX_OPERATORS,false, true,false,0,false);
                 validateExpression(root); // 验证表达式有效性
             } catch (ValidationException e) {
                 root = null; // 如果验证失败则重新生成
@@ -36,42 +36,40 @@ public class ExpressionGenerator {
 
     private ExpressionNode buildExpressionTree(int remainingOps, boolean bracketsUsed,
                                                boolean isRoot, boolean inBracketContext,
-                                               int parentPriority) {
+                                               int parentPriority, boolean alreadyInBrackets) {
         if (remainingOps <= 0) {
             return new NumberNode(Fraction.generate(range));
         }
 
         Operator op = randomOperator();
-        // 动态分配剩余运算符（关键修改点）
         int leftOps = random.nextInt(remainingOps);
         int rightOps = remainingOps - leftOps - 1;
 
-        // 强化括号上下文传递（新增多层检测）
-        boolean canAddBracket = !isRoot && !inBracketContext && remainingOps >= 2;
-        boolean addBrackets = canAddBracket && random.nextDouble() < BRACKET_PROBABILITY;
+        // 强化括号上下文传递，避免重复添加括号
+        boolean canAddBracket = !isRoot && !inBracketContext && remainingOps >= 2 && !alreadyInBrackets;
+        boolean addBrackets = canAddBracket && shouldAddBrackets(remainingOps);
 
         // 生成子树时严格传递上下文状态
         ExpressionNode left = buildSubTree(leftOps, bracketsUsed || addBrackets,
-                addBrackets, op.getPriority());
+                addBrackets, op.getPriority(), addBrackets);
         ExpressionNode right = buildSubTree(rightOps, bracketsUsed || addBrackets,
-                addBrackets, op.getPriority());
+                addBrackets, op.getPriority(), addBrackets);
 
         return new OperatorNode(op, left, right, addBrackets, isRoot, parentPriority);
     }
 
     private ExpressionNode buildSubTree(int remainingOps, boolean bracketsUsed,
-                                        boolean inBracketContext, int parentPriority) {
+                                        boolean inBracketContext, int parentPriority, boolean alreadyInBrackets) {
         if (remainingOps > 0 && random.nextDouble() < 0.4) {
             return buildExpressionTree(remainingOps, bracketsUsed, false,
-                    inBracketContext, parentPriority);
+                    inBracketContext, parentPriority, alreadyInBrackets);
         }
         return new NumberNode(Fraction.generate(range));
     }
 
-
-     private boolean shouldAddBrackets(int remainingOps) {
-           return random.nextDouble() < BRACKET_PROBABILITY * (4 - remainingOps)/3.0;
-        }
+    private boolean shouldAddBrackets(int remainingOps) {
+        return random.nextDouble() < BRACKET_PROBABILITY * (4 - remainingOps) / 3.0;
+    }
 
     private Operator randomOperator() {
         Operator[] operators = Operator.values();
