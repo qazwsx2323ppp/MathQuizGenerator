@@ -34,6 +34,9 @@ public class Fraction {
 //    }
 
     public static Fraction generate(int range) {
+        if (range <= 0) {
+            throw new IllegalArgumentException("range 必须大于零");
+        }
         Random random = new Random();
         int numerator = random.nextInt(range);   // [0, range-1]
         int denominator = random.nextInt(range) + 1; // [1, range]
@@ -47,7 +50,11 @@ public class Fraction {
     }
 
     public Fraction subtract(Fraction other) {
+
         int newDenominator = this.denominator * other.denominator;
+        if (newDenominator == 0) {
+            throw new ArithmeticException("减法操作中生成了分母为零的分数");
+        }
         int newNumerator = this.numerator * other.denominator - other.numerator * this.denominator;
         return new Fraction(newNumerator, newDenominator);
     }
@@ -78,6 +85,9 @@ public class Fraction {
     }
 
     private static int gcd(int a, int b) {
+        if (a == 0 && b == 0) {
+            throw new ArithmeticException("gcd(0, 0) 未定义");
+        }
         return b == 0 ? a : gcd(b, a % b);
     }
 
