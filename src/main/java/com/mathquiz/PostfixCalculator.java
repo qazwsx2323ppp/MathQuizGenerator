@@ -1,3 +1,7 @@
+package com.mathquiz;
+
+import com.mathquiz.Fraction;
+
 import java.util.List;
 import java.util.Stack;
 

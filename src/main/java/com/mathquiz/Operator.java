@@ -1,3 +1,5 @@
+package com.mathquiz;
+
 public enum Operator {
     ADD("+", 1),
     SUBTRACT("-", 1),

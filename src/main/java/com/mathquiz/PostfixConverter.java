@@ -1,3 +1,7 @@
+package com.mathquiz;
+
+import com.mathquiz.Operator;
+
 import java.util.*;
 
 public class PostfixConverter {

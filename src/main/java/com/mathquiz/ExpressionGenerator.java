@@ -1,3 +1,5 @@
+package com.mathquiz;
+
 import java.util.List;
 import java.util.Random;
 
