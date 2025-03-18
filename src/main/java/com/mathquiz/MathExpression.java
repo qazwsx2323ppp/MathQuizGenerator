@@ -1,3 +1,5 @@
+package com.mathquiz;
+
 public class MathExpression {
 
     private String expression;  // 表达式字符串

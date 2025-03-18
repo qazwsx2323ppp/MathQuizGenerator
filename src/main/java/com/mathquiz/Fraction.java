@@ -1,3 +1,5 @@
+package com.mathquiz;
+
 import java.util.Random;
 
 public class Fraction {

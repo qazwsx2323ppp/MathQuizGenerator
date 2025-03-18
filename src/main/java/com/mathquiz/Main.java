@@ -1,3 +1,5 @@
+package com.mathquiz;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,6 +48,7 @@ public class Main {
         }
 
         generateMode(numQuestions, range, maxOperators);//传入的3个参数
+        System.out.println("生成完毕");
     }
 
     private static int parsePositiveInt(String value, String paramName) {

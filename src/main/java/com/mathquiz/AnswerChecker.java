@@ -1,3 +1,5 @@
+package com.mathquiz;
+
 import java.io.*;
 import java.util.*;
 
